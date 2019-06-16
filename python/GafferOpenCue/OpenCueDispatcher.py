@@ -53,13 +53,8 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 		self["service"] = Gaffer.StringPlug( defaultValue = 'default' )
 		self["envKey"] = Gaffer.StringPlug()
 
-	## Emitted prior to spooling the Tractor job, to allow
+	## Emitted prior to spooling the OpenCue job, to allow
 	# custom modifications to be applied.
-	#
-	# Slots should have the signature `slot( dispatcher, job )`,
-	# where dispatcher is the TractorDispatcher and job will
-	# be the instance of tractor.api.author.Job that is about
-	# to be spooled.
 	@classmethod
 	def preSpoolSignal( cls ) :
 
@@ -173,10 +168,19 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 		opencuePlug = batch.node()["dispatcher"].getChild( "opencue" )
 
 		if opencuePlug is not None :
-			layerArgs["threads"] = batch.context().substitute( opencuePlug["threads"].getValue() )
-			layerArgs["threadable"] = batch.context().substitute( opencuePlug["threadable"].getValue() )
-			layerArgs["memory"] = batch.context().substitute( opencuePlug["memory"].getValue() )
-			layerArgs["tags"] = batch.context().substitute( opencuePlug["tags"].getValue() )
+			threadable = batch.context().substitute( opencuePlug["threadable"].getValue() )
+			threads = batch.context().substitute( opencuePlug["threads"].getValue() )
+			layerArgs["threadable"] = threadable
+			if not threadable :
+				layerArgs["threads"] = 1
+			elif threads > 0 :
+				layerArgs["threads"] = threads
+			memory = batch.context().substitute( opencuePlug["memory"].getValue() )
+			if memory > 0 :
+				layerArgs["memory"] = memory
+			tags = batch.context().substitute( opencuePlug["tags"].getValue() )
+			if tags:
+				layerArgs["tags"] = tags
 			service = batch.context().substitute( opencuePlug["service"].getValue() )
 		
 		# Create an OpenCue Shell to execute that command line, which is a subclassed layer

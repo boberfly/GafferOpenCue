@@ -23,5 +23,21 @@ Add to Gaffer extensions path:
 
 `export GAFFER_EXTENSION_PATHS=$GAFFEROPENCUE:$GAFFER_EXTENSION_PATHS`
 
-Run Gaffer:
+Additionally make an export of CUE_HOSTS that points to your cuebot farm. If it
+is on the same machine, use "localhost".
+
+`export CUE_HOSTS="localhost"`
+
+And then run Gaffer
+
 `gaffer`
+
+Verify that you can connect to your cuebot farm in the Gaffer script editor:
+
+```
+import opencue
+import outline
+[show.name() for show in opencue.api.getShows()]
+```
+
+Which should return something like `[u'testing']`

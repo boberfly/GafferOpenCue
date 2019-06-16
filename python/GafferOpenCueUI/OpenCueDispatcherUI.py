@@ -142,7 +142,10 @@ Gaffer.Metadata.registerNode(
 
 			"description",
 			"""
-			Minimum thread count the task needs.
+			Minimum thread count the task needs. Left at
+			0 means it will use any available threads.
+			This will be overwritten to 1 if threadable
+			is set to false.
 			""",
 
 		],
@@ -151,7 +154,9 @@ Gaffer.Metadata.registerNode(
 
 			"description",
 			"""
-			Specifies how much memory is needed for the task.
+			Specifies how much memory is needed for the task
+			in megabytes. Left at 0 means it will use any 
+			available memory.
 			""",
 
 		],
