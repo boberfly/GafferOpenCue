@@ -29,7 +29,7 @@ cp -r python $GAFFEROPENCUE/
 cp -r startup $GAFFEROPENCUE/
 cp -r LICENSE $GAFFEROPENCUE/doc/licenses/GafferOpenCue
 
-mkdir -p $GAFFEROPENCUE_INSTALL/python/pycue
+mkdir -p $GAFFEROPENCUE/python/pycue
 cp -r $OPENCUE_LOCATION/pycue/FileSequence $GAFFEROPENCUE/python/
 cp -r $OPENCUE_LOCATION/pycue/opencue $GAFFEROPENCUE/python/
 #cp -r $OPENCUE_LOCATION/pycue/tests $GAFFEROPENCUE/python/
@@ -41,5 +41,7 @@ cp -r $OPENCUE_LOCATION/pyoutline/etc/outline.cfg $GAFFEROPENCUE/etc/
 cp -r $OPENCUE_LOCATION/pyoutline/outline $GAFFEROPENCUE/python/
 #cp -r $OPENCUE_LOCATION/pyoutline/tests $GAFFEROPENCUE/python/
 #cp -r $OPENCUE_LOCATION/pyoutline/wrappers $GAFFEROPENCUE/python/
+
+cp -r $OPENCUE_LOCATION/cuegui/cuegui $GAFFEROPENCUE/python/cuegui
 
 echo "GAFFEROPENCUE INSTALLATION COMPLETE"

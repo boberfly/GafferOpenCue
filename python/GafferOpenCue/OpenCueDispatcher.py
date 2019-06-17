@@ -52,6 +52,9 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 
 		self["service"] = Gaffer.StringPlug( defaultValue = 'default' )
 		self["envKey"] = Gaffer.StringPlug()
+		self["showName"] = Gaffer.StringPlug( defaultValue = "${project:showName}" )
+		self["shotName"] = Gaffer.StringPlug( defaultValue = "${project:shotName}" )
+		self["userName"] = Gaffer.StringPlug( defaultValue = os.environ.get('USER') )
 
 	## Emitted prior to spooling the OpenCue job, to allow
 	# custom modifications to be applied.
@@ -80,9 +83,9 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 
 		outline = Outline( 
 			context.substitute( self["jobName"].getValue() ) or "untitled",
-			shot = context.substitute( self["project:shotName"].getValue() ) or "shot",
-			show = context.substitute( self["project:name"].getValue() ) or "show",
-			user = context.substitute( self["user"].getValue() ) or "user",
+			show = context.substitute( self["showName"].getValue() ) or "show",
+			shot = context.substitute( self["shotName"].getValue() ) or "shot",
+			user = context.substitute( self["userName"].getValue() ) or "user",
 		)
 
 		# Populate the job with tasks from the batch tree
@@ -94,7 +97,7 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 		# Signal anyone who might want to make just-in-time
 		# modifications to the job.
 
-		self.preSpoolSignal()( self, job )
+		self.preSpoolSignal()( self, outline )
 
 		# Finally, we can spool the job.
 
@@ -157,7 +160,7 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 
 		layerArgs = {
 			"command" : args,
-			"chunk" : batch.context().substitute( self["batchSize"].getValue() ),
+			"chunk" : batch.node()["dispatcher"]["batchSize"].getValue(),
 			"range" : frames,
 			"threads" : None,
 			"threadable" : None,
@@ -168,24 +171,32 @@ class OpenCueDispatcher( GafferDispatch.Dispatcher ) :
 		opencuePlug = batch.node()["dispatcher"].getChild( "opencue" )
 
 		if opencuePlug is not None :
-			threadable = batch.context().substitute( opencuePlug["threadable"].getValue() )
-			threads = batch.context().substitute( opencuePlug["threads"].getValue() )
+			threadable = opencuePlug["threadable"].getValue()
+			threads = opencuePlug["threads"].getValue()
 			layerArgs["threadable"] = threadable
 			if not threadable :
 				layerArgs["threads"] = 1
 			elif threads > 0 :
 				layerArgs["threads"] = threads
-			memory = batch.context().substitute( opencuePlug["memory"].getValue() )
+			memory = opencuePlug["memory"].getValue()
 			if memory > 0 :
 				layerArgs["memory"] = memory
-			tags = batch.context().substitute( opencuePlug["tags"].getValue() )
+			tags = opencuePlug["tags"].getValue()
 			if tags:
 				layerArgs["tags"] = tags
-			service = batch.context().substitute( opencuePlug["service"].getValue() )
+			service = opencuePlug["service"].getValue()
 		
 		# Create an OpenCue Shell to execute that command line, which is a subclassed layer
 
-		layer = Shell( layerName, *layerArgs )
+		layer = Shell(  layerName, 
+						command = layerArgs['command'],
+						chunk = layerArgs['chunk'],
+						range = layerArgs['range'],
+						threads = layerArgs['threads'],
+						threadable = layerArgs['threadable'],
+						memory = layerArgs['memory'],
+						tags = layerArgs['tags'],
+		)
 
 		layer.set_service( service )
 
